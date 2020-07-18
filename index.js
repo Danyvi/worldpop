@@ -14,10 +14,10 @@ const render = data => {
 
     // margin definition
     const margin = {
-        top: 20,
+        top: 50,
         right: 40,
-        bottom: 20,
-        left: 100
+        bottom: 77,
+        left: 180
     };
 
     // innerWidth = overall width - left margin - right margin
@@ -39,7 +39,14 @@ const render = data => {
     /* console.log('x Domain: ', xScale.domain()); // return the domain 
     console.log('x Range: ', xScale.range()); // return the range  */
 
-    const xAxis = d3.axisBottom(xScale);
+    const xAxisTickFormat = number => 
+        d3.format('.3s')(number)
+            .replace('G','B');
+
+    const xAxis = d3
+        .axisBottom(xScale)
+        .tickFormat(xAxisTickFormat)
+        .tickSize(-innerHeight+5);
 
     // bandscales are useful for 'ordinal' attributes
     // padding for separation between the bars
@@ -66,13 +73,26 @@ const render = data => {
     g
         .append('g')
         .call(yAxis)
-    // translate the xAxis group element so tthat is shifted to the bottom and not to the top
-    g
+        .selectAll('.domain, .tick line')
+        .remove();
+
+        // translate the xAxis group element so tthat is shifted to the bottom and not to the top
+    const xAxisGroup = g
         .append('g')
         .call(xAxis)
         .attr('transform', `translate(0, ${innerHeight})`);
+    
+    xAxisGroup
+        .select('.domain')
+        .remove()
 
-
+    xAxisGroup
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('y', 65)
+        .attr('x', innerWidth/2)
+        .attr('fill', 'black')
+        .text('Population') 
 
     g
         .selectAll('rect')
@@ -82,6 +102,12 @@ const render = data => {
         .attr('y', d => yScale(yValue(d)))
         .attr('width', d => xScale(xValue(d)))
         .attr('height', d => yScale.bandwidth());
+
+    g
+        .append('text')
+        .attr('class', 'title')
+        .attr('y', -10)
+        .text('Top 10 Most populous Countries')
 };
 
 d3.csv('data.csv').then(data => {
